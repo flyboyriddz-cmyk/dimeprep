@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" />
+    <meta name="format-detection" content="telephone=no">
+    <title>D.P GEMS // SUPER EDITION</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://lh3.googleusercontent.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    
+    <!-- Preload Critical Visuals for Seamless Experience -->
+    <link rel="preload" as="image" href="https://lh3.googleusercontent.com/d/1AvEBxFjiDeHeafONBMZy9l3q-gky_f_r">
+    <link rel="preload" as="image" href="https://lh3.googleusercontent.com/d/1sgVfKvpDIqIP4KyEGM5jX_37TNtmHpaQ">
+    <link rel="preload" as="image" href="https://lh3.googleusercontent.com/d/1MferAsUvaCBEgSrHgcOOmE52T0HmtT56" fetchpriority="high">
+
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'snes-bg': 'var(--snes-bg)',
+              'snes-light': 'var(--snes-light)',
+              'snes-dark': 'var(--snes-dark)',
+              'snes-white': 'var(--snes-white)',
+              'snes-inverse': 'var(--snes-inverse)',
+              'snes-purple': 'var(--snes-purple)',
+              'snes-purple-light': 'var(--snes-purple-light)',
+              'snes-red': 'var(--snes-red)',
+              'snes-green': 'var(--snes-green)',
+              'snes-yellow': 'var(--snes-yellow)',
+              'snes-blue': 'var(--snes-blue)',
+              'snes-gray-dark': 'var(--snes-gray-dark)',
+              'snes-orange': 'var(--snes-orange)',
+              'retro-term': 'var(--retro-term)',
+            },
+            fontFamily: {
+              'pixel': ['"VT323"', 'monospace'],
+              'retro': ['"VT323"', 'monospace'],
+            },
+            animation: {
+              'bounce-slow': 'bounce 2s infinite',
+              'blink': 'blink 1s step-end infinite',
+              'vhs': 'vhs-flicker 2s infinite',
+              'glitch-text': 'glitch-snap 5s infinite',
+              'load-progress': 'loading-bar 0.8s ease-out forwards',
+              'grid-move': 'grid-scroll 1s linear infinite',
+              'float': 'float 3s ease-in-out infinite',
+              'holo': 'holo-shimmer 3s ease-in-out infinite alternate',
+              'crt-on': 'crt-turn-on 0.4s cubic-bezier(0.23, 1.0, 0.32, 1.0) forwards',
+              'wipe-right': 'wipe-in-right 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards',
+              'wipe-left': 'wipe-in-left 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards',
+              'zoom-in': 'zoom-in 0.3s ease-out forwards',
+              'gem-float': 'gem-float 3s ease-in-out infinite',
+              'marquee': 'marquee 20s linear infinite',
+            },
+            keyframes: {
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-10px)' },
+              },
+              'gem-float': {
+                '0%, 100%': { transform: 'translateY(0) scale(1)', filter: 'drop-shadow(0 0 0px rgba(92, 79, 179, 0))' },
+                '50%': { transform: 'translateY(-10px) scale(1.1)', filter: 'drop-shadow(0 0 8px rgba(92, 79, 179, 0.6))' },
+              },
+              'holo-shimmer': {
+                '0%': { opacity: '0.3', backgroundPosition: '0% 50%' },
+                '100%': { opacity: '0.7', backgroundPosition: '100% 50%' },
+              },
+              'crt-turn-on': {
+                '0%': { transform: 'scale(1, 0.005)', opacity: '0', filter: 'brightness(30)' },
+                '30%': { transform: 'scale(1, 0.005)', opacity: '1', filter: 'brightness(10)' },
+                '60%': { transform: 'scale(1.1, 0.05)', filter: 'brightness(5)' },
+                '100%': { transform: 'scale(1, 1)', opacity: '1', filter: 'brightness(1)' },
+              },
+              'wipe-in-right': {
+                '0%': { clipPath: 'inset(0 0 0 100%)', filter: 'brightness(1.5) sepia(1)' },
+                '100%': { clipPath: 'inset(0 0 0 0)', filter: 'brightness(1) sepia(0)' },
+              },
+              'wipe-in-left': {
+                '0%': { clipPath: 'inset(0 100% 0 0)', filter: 'brightness(1.5) sepia(1)' },
+                '100%': { clipPath: 'inset(0 0 0 0)', filter: 'brightness(1) sepia(0)' },
+              },
+              'zoom-in': {
+                '0%': { opacity: '0', transform: 'scale(0.95)' },
+                '100%': { opacity: '1', transform: 'scale(1)' },
+              },
+              marquee: {
+                '0%': { transform: 'translateX(0%)' },
+                '100%': { transform: 'translateX(-100%)' },
+              }
+            }
+          },
+        },
+      };
+    </script>
+    <style>
+      :root {
+        --snes-bg: #e0e0dc;
+        --snes-light: #f0f0f4;
+        --snes-dark: #2c2c36;
+        --snes-white: #ffffff;
+        --snes-inverse: #e0e0dc;
+        --snes-purple: #5c4fb3;
+        --snes-purple-light: #8e84d4;
+        --snes-red: #d32f2f;
+        --snes-green: #008f40;
+        --snes-yellow: #fbc02d;
+        --snes-blue: #004ba0;
+        --snes-gray-dark: #555555;
+        --snes-orange: #ff6b00;
+        --retro-term: #33ff00;
+      }
+
+      .dark {
+        --snes-bg: #1a1a24;
+        --snes-light: #25252d;
+        --snes-dark: #e0e0dc;
+        --snes-white: #2c2c36;
+        --snes-inverse: #2c2c36;
+        --snes-purple: #8e84d4;
+        --snes-purple-light: #5c4fb3;
+        --snes-gray-dark: #a0a0a0;
+      }
+
+      html, body {
+        height: 100%;
+        width: 100%;
+        overflow-x: hidden;
+        /* Prevent pinch zoom and elastic scrolling */
+        touch-action: pan-x pan-y;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: none;
+      }
+
+      body {
+        background-color: var(--snes-bg);
+        font-family: 'VT323', monospace;
+        /* Disable text selection global */
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        /* Mobile Touch Callouts Disable */
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+        /* Prevent font boosting on mobile */
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+      
+      /* Global Override for Form Elements to ensure Retro Font */
+      input, button, select, textarea {
+        font-family: 'VT323', monospace;
+      }
+
+      /* Re-enable text selection for input fields */
+      input, textarea, select {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+      }
+
+      /* Disable image dragging */
+      img {
+        -webkit-user-drag: none;
+        -khtml-user-drag: none;
+        -moz-user-drag: none;
+        -o-user-drag: none;
+        user-drag: none;
+        pointer-events: none; /* Prevents long-press save image on mobile */
+      }
+
+      /* PRINT PROTECTION: Hide content if user tries to print/pdf */
+      @media print {
+        html, body {
+          display: none !important;
+          height: 0 !important;
+          overflow: hidden !important;
+        }
+      }
+      
+      /* Custom Scrollbar */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: var(--snes-light);
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: var(--snes-purple);
+        border-radius: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: var(--snes-purple-light);
+      }
+
+      /* Animations */
+      @keyframes blink {
+        50% { opacity: 0; }
+      }
+      
+      @keyframes vhs-flicker {
+        0% { opacity: 0.95; }
+        5% { opacity: 0.8; }
+        10% { opacity: 0.95; }
+        15% { opacity: 0.6; }
+        20% { opacity: 0.95; }
+        100% { opacity: 0.95; }
+      }
+
+      @keyframes glitch-snap {
+        2%, 64% { transform: translate(2px,0) skew(0deg); }
+        4%, 60% { transform: translate(-2px,0) skew(0deg); }
+        62% { transform: translate(0,0) skew(5deg); }
+      }
+
+      @keyframes loading-bar {
+        0% { width: 0%; }
+        100% { width: 100%; }
+      }
+
+      @keyframes grid-scroll {
+        0% { background-position: 0 0; }
+        100% { background-position: 40px 40px; }
+      }
+      
+      @keyframes text-shine {
+        from { background-position: 0% center; }
+        to { background-position: 200% center; }
+      }
+
+      .text-shadow-md {
+        text-shadow: 2px 2px 0px rgba(0,0,0,0.3);
+      }
+      
+      .holo-gradient {
+        background: linear-gradient(135deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 70%);
+        background-size: 200% 200%;
+      }
+      
+      .image-pixelated {
+        image-rendering: pixelated;
+      }
+
+      .animate-blink { animation: blink 1s step-end infinite; }
+      .animate-vhs { animation: vhs-flicker 0.1s infinite; }
+      .animate-glitch-text { animation: glitch-snap 3s infinite; }
+      .animate-load-progress { animation: loading-bar 1s ease-out forwards; }
+      .animate-grid-move { animation: grid-scroll 2s linear infinite; }
+      .animate-float { animation: float 3s ease-in-out infinite; }
+      .animate-holo { animation: holo-shimmer 2s linear infinite; }
+      .animate-text-shine { animation: text-shine 3s linear infinite; }
+
+      .fade-in {
+        animation: fadeIn 0.5s ease-in;
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+    "@google-pay/button-react": "https://esm.sh/@google-pay/button-react@^3.2.1",
+    "@paypal/react-paypal-js": "https://esm.sh/@paypal/react-paypal-js@^8.9.2",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.89.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="index.tsx"></script>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
