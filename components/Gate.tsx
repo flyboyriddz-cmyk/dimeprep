@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, Globe, Terminal, ShieldAlert, User } from 'lucide-react';
+import { Lock, Globe, Terminal, User } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 
 interface GateProps {
@@ -13,7 +13,7 @@ export const Gate: React.FC<GateProps> = ({ onUnlock, isDarkMode }) => {
   const [gateStatus, setGateStatus] = useState<GateStatus>('IDLE');
   const [logs, setLogs] = useState<string[]>([]);
   
-  // Clean Form State matching the UI reference
+  // Clean Form State matching your visual design
   const [firstName, setFirstName] = useState('');
   const [email, setEmail] = useState('');
   const [sectorSpec, setSectorSpec] = useState('SECTOR_01 // GARMENT DROPS');
@@ -42,7 +42,7 @@ export const Gate: React.FC<GateProps> = ({ onUnlock, isDarkMode }) => {
       setTimeout(() => addLog('ESTABLISHING SECURE CONNECTION...'), 400);
       setTimeout(() => addLog('VERIFYING ENCRYPTION KEYS...'), 800);
 
-      // Clean insert into Supabase profiles table matching exact fields
+      // Direct Database Insert (Bypasses Auth/Captcha restriction completely)
       const { error } = await supabase.from('profiles').insert([
         {
           first_name: firstName,
@@ -53,7 +53,7 @@ export const Gate: React.FC<GateProps> = ({ onUnlock, isDarkMode }) => {
       ]);
 
       if (error) {
-        console.warn('Supabase warning (non-fatal):', error.message);
+        throw new Error(error.message);
       }
 
       setTimeout(() => {
@@ -72,9 +72,9 @@ export const Gate: React.FC<GateProps> = ({ onUnlock, isDarkMode }) => {
       }, 1200);
 
     } catch (err: any) {
-      console.error('Submission error:', err);
+      console.error('Submission error:', err.message || err);
       setGateStatus('IDLE');
-      setErrorMsg('SYSTEM ERROR: RE-AUTHORIZE UPLINK');
+      setErrorMsg(`SYSTEM ERROR: ${err.message || 'RE-AUTHORIZE UPLINK'}`);
     }
   };
 
