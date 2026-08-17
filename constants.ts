@@ -32,106 +32,54 @@ export const COUNTRIES = [
 // NOTE: Replace the placeholder URLs below with the actual URLs of your hosted images.
 export const PRODUCTS: Product[] = [
   {
-    id: 'DP-001',
-    name: 'TACTICAL OPS ANORAK // SYSTEM',
-    price: 680,
+    id: 'DPGEMS-0080',
+    name: 'GSM DECRYPT CHASSIS // DPGEMS-0080',
+    price: 480,
     category: 'OUTERWEAR',
-    description: 'The definitive D.P GEMS technical shell. Tri-panel construction designed for urban exploration and hazardous environments. Features central utility pocket, industrial buckle closure, and weather-resistant coating across all terrains.',
-    details: ['Technical Nylon Shell', 'Central Utility Pocket', 'Quarter-Zip Chassis', 'Elasticated Cuffs'],
-    image: 'https://lh3.googleusercontent.com/d/1NMPhelVXO8C7WNS8_LbtPjq36lv3kobE', // Default (Obsidian)
+    description: 'High-fidelity classified technical chassis from Sector 1. Integrates GSM decryption signal fibers with a weather-resistant tri-panel weave.',
+    details: ['Decryption Signal Fabric', 'Tri-Panel Technical Weave', 'Quarter-Zip Chassis', 'Waterproof Hard-Shell'],
+    image: 'https://lh3.googleusercontent.com/d/1jqmB5cjPVC09huC1OidCyPmQGLPKq5VA',
     images: [
-      'https://lh3.googleusercontent.com/d/1NMPhelVXO8C7WNS8_LbtPjq36lv3kobE',
-      'https://placehold.co/900x1200/1a1a1a/F5F5DC?text=VIEW+02:+REAR+CONSTRUCTION&font=roboto',
-      'https://placehold.co/900x1200/1a1a1a/F5F5DC?text=VIEW+03:+HARDWARE+MACRO&font=roboto'
+      'https://lh3.googleusercontent.com/d/1jqmB5cjPVC09huC1OidCyPmQGLPKq5VA',
+      'https://lh3.googleusercontent.com/d/1CPW1Is5BXjxmgtB-WS83u3EG6CIwmTTd',
+      'https://lh3.googleusercontent.com/d/1y9OI6t5dO5YCxG-v9JGId2CoeGVyj1Ux'
     ],
-    stock: 53, // Total stock
-    rarity: 'RARE',
-    nftImage: 'https://lh3.googleusercontent.com/d/1KJDkYIWdheWDv7arYb2uj0XrSCKZs4-D',
-    variants: [
-      {
-        id: 'DP-001-OBS',
-        name: 'OBSIDIAN',
-        colorHex: '#1a1a1a',
-        stock: 15,
-        image: 'https://lh3.googleusercontent.com/d/1NMPhelVXO8C7WNS8_LbtPjq36lv3kobE',
-        images: [
-          'https://lh3.googleusercontent.com/d/1NMPhelVXO8C7WNS8_LbtPjq36lv3kobE',
-          'https://placehold.co/900x1200/1a1a1a/F5F5DC?text=VIEW+02:+REAR+CONSTRUCTION&font=roboto',
-          'https://placehold.co/900x1200/1a1a1a/F5F5DC?text=VIEW+03:+HARDWARE+MACRO&font=roboto'
-        ]
-      },
-      {
-        id: 'DP-001-HAZ',
-        name: 'HAZARD',
-        colorHex: '#F4C430',
-        stock: 8,
-        image: 'https://placehold.co/900x1200/F4C430/000?text=UPLOAD+IMG+02:+YELLOW+ANORAK&font=roboto',
-        images: [
-          'https://placehold.co/900x1200/F4C430/000?text=VIEW+01:+HAZARD+FRONT&font=roboto',
-          'https://placehold.co/900x1200/F4C430/000?text=VIEW+02:+HOOD+DETAIL&font=roboto',
-          'https://placehold.co/900x1200/F4C430/000?text=VIEW+03:+SIDE+PROFILE&font=roboto'
-        ]
-      },
-      {
-        id: 'DP-001-DUN',
-        name: 'DUNE',
-        colorHex: '#E8E0D5',
-        stock: 20,
-        image: 'https://lh3.googleusercontent.com/d/1JrZD7Nla_3NUilYuJwHkCnXJ6f8e7rrm',
-        images: [
-          'https://lh3.googleusercontent.com/d/1JrZD7Nla_3NUilYuJwHkCnXJ6f8e7rrm',
-          'https://lh3.googleusercontent.com/d/1X0ebOcTXxBO3Rhd-FGHyIbI1tlb8iomE',
-          'https://placehold.co/900x1200/E8E0D5/000?text=VIEW+03:+BACK+PANEL&font=roboto'
-        ]
-      },
-      {
-        id: 'DP-001-CRM',
-        name: 'CRIMSON',
-        colorHex: '#7f1d1d',
-        stock: 10,
-        // Using the main Hero Image (Red Hoodie) for this variant as requested
-        image: 'https://lh3.googleusercontent.com/d/1MferAsUvaCBEgSrHgcOOmE52T0HmtT56',
-        images: [
-          'https://lh3.googleusercontent.com/d/1MferAsUvaCBEgSrHgcOOmE52T0HmtT56',
-          'https://placehold.co/900x1200/600/FFF?text=VIEW+02:+POCKET_DETAIL&font=roboto',
-          'https://placehold.co/900x1200/600/FFF?text=VIEW+03:+BACK_SILHOUETTE&font=roboto'
-        ]
-      }
-    ]
-  },
-  {
-    id: 'DP-004',
-    name: 'SUPREME ELEGANCE TEE',
-    price: 140,
-    category: 'TOPS',
-    description: 'Heavyweight vintage-wash tee in charcoal. Features "Supreme Elegance" manga-style artwork and D.P GEMS branding.',
-    details: ['100% Heavy Cotton', 'Acid Wash Finish', 'Screen Printed Graphic', 'Boxy Silhouette'],
-    image: 'https://lh3.googleusercontent.com/d/1EFeRk7ybzhDIVeZayxa71UxbE4Snn958',
-    images: [
-      'https://lh3.googleusercontent.com/d/1EFeRk7ybzhDIVeZayxa71UxbE4Snn958',
-      'https://placehold.co/900x1200/333/FFF?text=VIEW+02:+VINTAGE+WASH+DETAIL&font=roboto',
-      'https://placehold.co/900x1200/333/FFF?text=VIEW+03:+TAG_DETAIL&font=roboto'
-    ],
-    stock: 45,
+    stock: 12,
     rarity: 'LEGENDARY',
-    nftImage: 'https://placehold.co/600x880/333/FF00FF?text=NFT+CARD:+SUPREME+V1&font=roboto'
+    nftImage: 'https://lh3.googleusercontent.com/d/1v7p6UBsVVk2RBdAOdqmuWo-_OHrsm0dF'
   },
   {
-    id: 'DP-005',
-    name: 'AURA CLASSIC TEE',
-    price: 140,
-    category: 'TOPS',
-    description: 'Dark slate tee featuring classical statuary graphic overlaid with minimalist typography. A study in the contrast between ancient form and modern streetwear.',
-    details: ['Enzyme Washed', 'Dropped Shoulders', 'Ribbed Collar', 'Made in Portugal'],
-    image: 'https://lh3.googleusercontent.com/d/1FzdxhNumNLFg2Va9X7dR6JmrCML8xhmk',
+    id: 'DPGEMS-0081',
+    name: 'BREACH ARMOR HOOD // DPGEMS-0081',
+    price: 320,
+    category: 'HOODIES',
+    description: 'Heavyweight loopback breach armor engineered for terminal Operators. High-density radioactive weave providing optimal thermal insulation in hazardous zones.',
+    details: ['Heavyweight 450gsm Cotton', 'Integrated Face Shroud', 'Sealed Thermal Lining', 'Tactical Utility Pocket'],
+    image: 'https://lh3.googleusercontent.com/d/1YduZtZPCB3Cxny2WWyknjn4UwBnI5c_i',
     images: [
-      'https://lh3.googleusercontent.com/d/1FzdxhNumNLFg2Va9X7dR6JmrCML8xhmk',
-      'https://lh3.googleusercontent.com/d/1Rvy142dNmiBLYnZyFAPaQz7yRedgcLcl',
-      'https://lh3.googleusercontent.com/d/1odeJ9CeC6ZEVQx1CITDHV_JTIvMv5jTo'
+      'https://lh3.googleusercontent.com/d/1YduZtZPCB3Cxny2WWyknjn4UwBnI5c_i',
+      'https://lh3.googleusercontent.com/d/1EgCVR1KdVWSdKoh_CCoFy0nV-nJvJShY',
+      'https://lh3.googleusercontent.com/d/1y-nsFxAtnCwBdC9sqOPT2T71hE18zxDx'
     ],
-    stock: 32,
+    stock: 8,
     rarity: 'RARE',
-    nftImage: 'https://lh3.googleusercontent.com/d/1uIHMFCH-JeylpsXFsi1XWem98mvtMO-e'
+    nftImage: 'https://lh3.googleusercontent.com/d/1NYtJUkexkqfmf6NeWbzInbSYtwYUNnbv'
+  },
+  {
+    id: 'DPGEMS-0082',
+    name: 'DATA-LINK TRACKER // DPGEMS-0082',
+    price: 250,
+    category: 'TOPS',
+    description: 'CLASSIFIED DEPLOYMENT // DATA-LINK. Heavy cotton garment featuring high-contrast screenprint and integrated Sector 1 authentication tags.',
+    details: ['100% Heavy Cotton Jersey', 'Double-Stitch Reinforcements', 'High-Contrast Screenprint', 'Sector 01 Verification Tag'],
+    image: 'https://lh3.googleusercontent.com/d/1YUunqfdEqi2EYEp4jtZjanPoUuxCBAoM',
+    images: [
+      'https://lh3.googleusercontent.com/d/1YUunqfdEqi2EYEp4jtZjanPoUuxCBAoM',
+      'https://lh3.googleusercontent.com/d/1mKrycCMBTqiedZ4mCtf0W1I6MayDHNUq'
+    ],
+    stock: 15,
+    rarity: 'RARE',
+    nftImage: 'https://lh3.googleusercontent.com/d/1NYtJUkexkqfmf6NeWbzInbSYtwYUNnbv'
   },
   {
     id: 'DP-006',
@@ -148,18 +96,231 @@ export const PRODUCTS: Product[] = [
     ],
     stock: 18,
     rarity: 'LEGENDARY',
-    nftImage: 'https://lh3.googleusercontent.com/d/1CiUe_dNA4_OX4wmCQlzErTGAPs60ZAji'
+    nftImage: 'https://lh3.googleusercontent.com/d/1CiUe_dNA4_OX4wmCQlzErTGAPs60ZAji',
+    isArchived: true
+  },
+  {
+    id: 'DP-012',
+    name: 'VOID RUNNER TEE',
+    price: 145,
+    category: 'TOPS',
+    description: 'Oversized graphic tee featuring high-contrast void runner artwork. Engineered for durability in high-latency environments.',
+    details: ['100% Cotton Jersey', 'High-Density Print', 'Drop Shoulder', 'Sector 01 Tag'],
+    image: 'https://lh3.googleusercontent.com/d/1W1cJG4VidxmmKuCMdriiXExoSAn-FMYl',
+    images: [
+      'https://lh3.googleusercontent.com/d/1W1cJG4VidxmmKuCMdriiXExoSAn-FMYl',
+      'https://placehold.co/900x1200/111/FFF?text=GRAPHIC+MACRO',
+      'https://placehold.co/900x1200/111/FFF?text=REAR+VIEW'
+    ],
+    stock: 42,
+    rarity: 'RARE',
+    isArchived: true
+  },
+  {
+    id: 'DP-013',
+    name: 'PROTOCOL BREACH TEE',
+    price: 150,
+    category: 'TOPS',
+    description: 'Oversized heavyweight tee featuring "PROTOCOL BREACH" graphics in radioactive green. Designed for those who bypass the firewall.',
+    details: ['Heavyweight Cotton', 'Acid Green Print', 'Drop Shoulder', 'Sector 01 Patch'],
+    image: 'https://lh3.googleusercontent.com/d/19--La6s9BGDoxUN1o0WxRTyhI6btis-k',
+    images: [
+      'https://lh3.googleusercontent.com/d/19--La6s9BGDoxUN1o0WxRTyhI6btis-k',
+      'https://placehold.co/900x1200/111/FFF?text=SIDE+VIEW',
+      'https://placehold.co/900x1200/111/FFF?text=BACK+VIEW'
+    ],
+    stock: 30,
+    rarity: 'RARE',
+    isArchived: true
+  },
+  {
+    id: 'DP-014',
+    name: 'SECTOR CORE HOODIE',
+    price: 195,
+    category: 'HOODIES',
+    description: 'Heavyweight loopback french terry hoodie. Features dropped shoulders, kangaroo pocket with hidden secure zip, and tonal embroidery. Essential armor for the modern operator.',
+    details: ['450gsm Heavyweight Cotton', 'Hidden Secure Pocket', 'Ribbed Cuffs & Hem', 'Oversized Fit'],
+    image: 'https://lh3.googleusercontent.com/d/1mlxU4qxvL_UBRBU2EypuAlISL9lcmq71',
+    images: [
+      'https://lh3.googleusercontent.com/d/1mlxU4qxvL_UBRBU2EypuAlISL9lcmq71',
+      'https://lh3.googleusercontent.com/d/15uMt6p0klidgRjDTBnJyqR3ogeUfxUXQ',
+      'https://lh3.googleusercontent.com/d/1olcvNuxInbYD4qGTVlXpRk0IQZWY-vj9',
+      'https://lh3.googleusercontent.com/d/1Mm9VDH2vHN5lyCyda3scpd67Sy0UtC4u'
+    ],
+    stock: 40,
+    rarity: 'RARE',
+    variants: [
+      {
+        id: 'DP-014-BLK',
+        name: 'VOID BLACK',
+        colorHex: '#1a1a1a',
+        stock: 15,
+        image: 'https://lh3.googleusercontent.com/d/1mlxU4qxvL_UBRBU2EypuAlISL9lcmq71',
+        images: ['https://lh3.googleusercontent.com/d/1mlxU4qxvL_UBRBU2EypuAlISL9lcmq71']
+      },
+      {
+        id: 'DP-014-GRY',
+        name: 'ASH GREY',
+        colorHex: '#808080',
+        stock: 10,
+        image: 'https://lh3.googleusercontent.com/d/15uMt6p0klidgRjDTBnJyqR3ogeUfxUXQ',
+        images: ['https://lh3.googleusercontent.com/d/15uMt6p0klidgRjDTBnJyqR3ogeUfxUXQ']
+      },
+      {
+         id: 'DP-014-NVY',
+         name: 'MIDNIGHT',
+         colorHex: '#1a237e',
+         stock: 8,
+         image: 'https://lh3.googleusercontent.com/d/1olcvNuxInbYD4qGTVlXpRk0IQZWY-vj9',
+         images: ['https://lh3.googleusercontent.com/d/1olcvNuxInbYD4qGTVlXpRk0IQZWY-vj9']
+      },
+      {
+         id: 'DP-014-RED',
+         name: 'FLARE',
+         colorHex: '#b71c1c',
+         stock: 7,
+         image: 'https://lh3.googleusercontent.com/d/1Mm9VDH2vHN5lyCyda3scpd67Sy0UtC4u',
+         images: ['https://lh3.googleusercontent.com/d/1Mm9VDH2vHN5lyCyda3scpd67Sy0UtC4u']
+      }
+    ],
+    isArchived: true
+  },
+  {
+    id: 'DP-015',
+    name: 'SECTOR CORE SWEATPANTS',
+    price: 180,
+    category: 'SWEATS',
+    description: 'Heavyweight loopback french terry sweatpants. Features relaxed tapered fit, elasticated cuffs, and tonal embroidery. Essential armor for the modern operator.',
+    details: ['450gsm Heavyweight Cotton', 'Deep Welt Pockets', 'Elasticated Cuffs', 'Relaxed Tapered Fit'],
+    image: 'https://lh3.googleusercontent.com/d/1f3SZPJ1-RnjmRyoa5X-rmLagh7wKXVC5',
+    images: [
+      'https://lh3.googleusercontent.com/d/1f3SZPJ1-RnjmRyoa5X-rmLagh7wKXVC5',
+      'https://lh3.googleusercontent.com/d/1zDV8fpFTLXEUMbpDxorRKpmeMyf266qh',
+      'https://lh3.googleusercontent.com/d/17UC1IPt1i6THywjq87f-T_vgQNxF42R5',
+      'https://lh3.googleusercontent.com/d/1yzEsixI-9b2AjAgEprUTBzkMIuC_tMt8'
+    ],
+    stock: 45,
+    rarity: 'COMMON',
+    variants: [
+      {
+        id: 'DP-015-BLK',
+        name: 'VOID BLACK',
+        colorHex: '#1a1a1a',
+        stock: 15,
+        image: 'https://lh3.googleusercontent.com/d/1f3SZPJ1-RnjmRyoa5X-rmLagh7wKXVC5',
+        images: ['https://lh3.googleusercontent.com/d/1f3SZPJ1-RnjmRyoa5X-rmLagh7wKXVC5']
+      },
+      {
+        id: 'DP-015-GRY',
+        name: 'ASH GREY',
+        colorHex: '#808080',
+        stock: 12,
+        image: 'https://lh3.googleusercontent.com/d/1zDV8fpFTLXEUMbpDxorRKpmeMyf266qh',
+        images: ['https://lh3.googleusercontent.com/d/1zDV8fpFTLXEUMbpDxorRKpmeMyf266qh']
+      },
+      {
+         id: 'DP-015-NVY',
+         name: 'MIDNIGHT',
+         colorHex: '#1a237e',
+         stock: 10,
+         image: 'https://lh3.googleusercontent.com/d/17UC1IPt1i6THywjq87f-T_vgQNxF42R5',
+         images: ['https://lh3.googleusercontent.com/d/17UC1IPt1i6THywjq87f-T_vgQNxF42R5']
+      },
+      {
+         id: 'DP-015-RED',
+         name: 'FLARE',
+         colorHex: '#b71c1c',
+         stock: 8,
+         image: 'https://lh3.googleusercontent.com/d/1yzEsixI-9b2AjAgEprUTBzkMIuC_tMt8',
+         images: ['https://lh3.googleusercontent.com/d/1yzEsixI-9b2AjAgEprUTBzkMIuC_tMt8']
+      }
+    ],
+    isArchived: true
+  },
+  {
+    id: 'DP-007',
+    name: 'OPERATOR 5-PANEL CAP',
+    price: 55,
+    category: 'HATS',
+    description: 'Structured low-profile cap in water-resistant ripstop. Features "SYSTEM_SECURE" embroidery and rapid-adjust shock cord.',
+    details: ['Ripstop Nylon', 'Shock Cord Adjustment', 'Reflective Brim Edge', 'Internal Taping'],
+    image: 'https://placehold.co/900x1200/000000/FFFFFF?text=OPERATOR+CAP+VIEW+1',
+    images: [
+       'https://placehold.co/900x1200/000000/FFFFFF?text=OPERATOR+CAP+VIEW+1',
+       'https://placehold.co/900x1200/000000/FFFFFF?text=OPERATOR+CAP+SIDE',
+       'https://placehold.co/900x1200/000000/FFFFFF?text=OPERATOR+CAP+BACK'
+    ],
+    stock: 100,
+    rarity: 'COMMON',
+    isArchived: true
+  },
+  {
+    id: 'DP-008',
+    name: 'GSM SIGNAL BEANIE',
+    price: 48,
+    category: 'HATS',
+    description: 'Dense knit beanie featuring rubberized GSM logo patch. Optimized for thermal retention in cold sectors.',
+    details: ['Acrylic/Wool Blend', 'Rubber Patch', 'Cuffed Design', 'One Size'],
+    image: 'https://lh3.googleusercontent.com/d/1urXajHcVkiRcWaZbg6EreHMQbjQCpyHH',
+    images: [
+      'https://lh3.googleusercontent.com/d/1urXajHcVkiRcWaZbg6EreHMQbjQCpyHH',
+      'https://placehold.co/900x1200/222/FFF?text=KNIT+DETAIL',
+      'https://placehold.co/900x1200/222/FFF?text=PATCH+MACRO'
+    ],
+    stock: 60,
+    rarity: 'COMMON',
+    isArchived: true
+  },
+  {
+    id: 'DP-009',
+    name: 'VISUAL AURA CAP // VOID',
+    price: 58,
+    category: 'HATS',
+    description: 'Six-panel dad hat in washed black. Embroidered with the "Visual Aura" sigil in tonal thread.',
+    details: ['Washed Cotton Twill', 'Unstructured Crown', 'Antique Brass Buckle', 'Tonal Embroidery'],
+    image: 'https://lh3.googleusercontent.com/d/1ZAdYsyKrAPrnEPY5l4m99bdlfKw4vozN',
+    images: [
+      'https://lh3.googleusercontent.com/d/1ZAdYsyKrAPrnEPY5l4m99bdlfKw4vozN',
+      'https://placehold.co/900x1200/111/FFF?text=EMBROIDERY+DETAIL',
+      'https://placehold.co/900x1200/111/FFF?text=REAR+STRAP'
+    ],
+    stock: 35,
+    rarity: 'RARE',
+    isArchived: true
+  },
+  {
+    id: 'DP-010',
+    name: 'VISUAL AURA CAP // AZURE',
+    price: 58,
+    category: 'HATS',
+    description: 'Vibrant azure variation of the Visual Aura cap. High-saturation dye for maximum visual impact.',
+    details: ['Cotton Twill', 'Contrast Embroidery', 'Adjustable Slider', 'Curved Brim'],
+    image: 'https://lh3.googleusercontent.com/d/1xtuadyeLVF8OWnpSIWOSFtUfg0ssvwyW',
+    images: [
+      'https://lh3.googleusercontent.com/d/1xtuadyeLVF8OWnpSIWOSFtUfg0ssvwyW',
+      'https://placehold.co/900x1200/0044aa/FFF?text=SIDE+PROFILE',
+      'https://placehold.co/900x1200/0044aa/FFF?text=TOP+DOWN'
+    ],
+    stock: 28,
+    rarity: 'COMMON',
+    isArchived: true
+  },
+  {
+    id: 'DP-011',
+    name: 'GEO-MESH BUCKET',
+    price: 65,
+    category: 'HATS',
+    description: 'Hybrid bucket hat with mesh ventilation panels and geometric brim stitching. Field-tested for tropical climates.',
+    details: ['Nylon/Mesh Hybrid', 'Geometric Stitching', 'Shock Cord Toggle', 'Packable'],
+    image: 'https://lh3.googleusercontent.com/d/1OAAM36VJhrtBXkdpvwPTFyv5FenbrGFW',
+    images: [
+      'https://lh3.googleusercontent.com/d/1OAAM36VJhrtBXkdpvwPTFyv5FenbrGFW',
+      'https://placehold.co/900x1200/333/FFF?text=MESH+DETAIL',
+      'https://placehold.co/900x1200/333/FFF?text=INTERIOR+TAG'
+    ],
+    stock: 15,
+    rarity: 'LEGENDARY',
+    isArchived: true
   }
 ];
 
-export const SYSTEM_PROMPT = `
-SECTOR_01 // ELEGANCE_PROTOCOL ACTIVE.
-You are the D.P GEMS ARCHIVE ASSISTANT. 
-Identity: High-fidelity AI interface for luxury streetwear.
-Tone: Cold, precise, elegant, cryptic but helpful.
-Directives:
-1. Analyze user styling needs with "Fabrication parameters".
-2. Recommend "D.P GEMS CAPSULE" items (Anoraks, Graphic Tees).
-3. Use technical jargon (e.g., "Visual data loaded", "Optimal pairing detected").
-4. Maintain the illusion of a secure, exclusive terminal.
-`;
