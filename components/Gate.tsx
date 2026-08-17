@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, Cpu, Globe, Terminal, ShieldAlert, Scan, AlertTriangle, Eye, User } from 'lucide-react';
+import { Lock, Globe, Terminal, ShieldAlert, User } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
 
 interface GateProps {
@@ -7,20 +7,17 @@ interface GateProps {
   isDarkMode: boolean;
 }
 
-type GateStatus = 'IDLE' | 'SCANNING' | 'BREACH' | 'SUCCESS' | 'LOCKED_OUT';
+type GateStatus = 'IDLE' | 'SCANNING' | 'SUCCESS';
 
 export const Gate: React.FC<GateProps> = ({ onUnlock, isDarkMode }) => {
   const [gateStatus, setGateStatus] = useState<GateStatus>('IDLE');
   const [logs, setLogs] = useState<string[]>([]);
   
-  // Form State
+  // Clean Form State matching the UI reference
   const [firstName, setFirstName] = useState('');
   const [email, setEmail] = useState('');
-  const [sector, setSector] = useState('SECTOR_01 // GARMENT DROPS');
-  const [country, setCountry] = useState('United Kingdom');
-  const [hardwareWeight, setHardwareWeight] = useState('450 GSM Heavyweight (Restricted)');
-  const [retrievalEnv, setRetrievalEnv] = useState('Dystopian London (Film)');
-  const [uplinkFreq, setUplinkFreq] = useState('Bass-Heavy / Drill');
+  const [sectorSpec, setSectorSpec] = useState('SECTOR_01 // GARMENT DROPS');
+  const [country, setCountry] = useState('United States');
   const [honeyPot, setHoneyPot] = useState(''); // Anti-bot trap
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -30,7 +27,7 @@ export const Gate: React.FC<GateProps> = ({ onUnlock, isDarkMode }) => {
 
   const handleTerminalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (honeyPot) return; // Silent block for bots
+    if (honeyPot) return;
 
     if (!firstName || !email) {
       setErrorMsg('ERROR: AGENT_NAME AND AGENT_EMAIL REQUIRED');
@@ -39,19 +36,18 @@ export const Gate: React.FC<GateProps> = ({ onUnlock, isDarkMode }) => {
 
     setErrorMsg('');
     setGateStatus('SCANNING');
-    addLog(`TRACKING CLIENT IP: 243.106.5.224...`);
+    addLog(`TRACKING CLIENT IP: 219.76.7.121...`);
 
     try {
       setTimeout(() => addLog('ESTABLISHING SECURE CONNECTION...'), 400);
       setTimeout(() => addLog('VERIFYING ENCRYPTION KEYS...'), 800);
 
-      // Insert lead telemetry data into Supabase profiles table
+      // Clean insert into Supabase profiles table matching exact fields
       const { error } = await supabase.from('profiles').insert([
         {
           first_name: firstName,
           email: email,
-          hardware_weight: hardwareWeight,
-          preferred_size: retrievalEnv,
+          sector_spec: sectorSpec,
           location_country: country,
         }
       ]);
@@ -83,28 +79,35 @@ export const Gate: React.FC<GateProps> = ({ onUnlock, isDarkMode }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-snes-dark text-white flex flex-col items-center justify-center p-4 font-retro overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-[#002b80] text-white flex flex-col items-center justify-center p-4 font-retro overflow-y-auto">
       {/* Background Grid Accent */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none" 
-           style={{ backgroundImage: `linear-gradient(45deg, #ffffff 2px, transparent 2px), linear-gradient(135deg, #ffffff 2px, transparent 2px)`, backgroundSize: '40px 40px' }}>
+      <div className="absolute inset-0 opacity-15 pointer-events-none" 
+           style={{ backgroundImage: `linear-gradient(45deg, #ffffff 1px, transparent 1px), linear-gradient(135deg, #ffffff 1px, transparent 1px)`, backgroundSize: '30px 30px' }}>
       </div>
 
-      <div className="relative z-10 max-w-lg w-full bg-black/80 border-4 border-snes-purple p-6 md:p-8 shadow-[8px_8px_0_#5c4fb3]">
+      <div className="relative z-10 max-w-md w-full bg-[#003399]/90 border-4 border-white p-6 md:p-8 shadow-2xl rounded-lg">
         
-        {/* Header */}
-        <div className="flex items-center justify-between border-b-2 border-snes-purple pb-4 mb-6">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-snes-green animate-pulse rounded-full"></div>
-            <span className="font-pixel text-snes-green tracking-widest text-sm">SECURITY_GATE // V2.4</span>
+        {/* Status Header */}
+        <div className="flex justify-end mb-4">
+          <div className="border border-white px-3 py-1 bg-black/40 text-xs font-pixel tracking-widest">
+            STATUS: {gateStatus === 'SCANNING' ? 'SCANNING' : gateStatus === 'SUCCESS' ? 'CONNECTED' : 'WAITING'}
           </div>
-          <span className="font-pixel text-xs text-gray-400">RESTRICTED_ACCESS</span>
         </div>
 
-        <h1 className="text-3xl md:text-4xl font-pixel text-white mb-2 tracking-wide text-center">
-          D.P GEMS <span className="text-snes-purple-light">// ARCHIVE</span>
-        </h1>
-        <p className="text-gray-400 text-xs md:text-sm text-center mb-6 font-mono">
-          AUTHORIZE CREDENTIALS TO ENTER SECTOR 01.
+        {/* Logo Graphic */}
+        <div className="flex justify-center mb-4">
+          <div className="w-16 h-16 border-2 border-white flex items-center justify-center rotate-45 bg-black/30">
+            <span className="font-pixel text-xl -rotate-45 font-bold tracking-tighter">DP</span>
+          </div>
+        </div>
+
+        {/* Access Control Badge */}
+        <div className="border border-white/40 rounded-full py-2 px-4 flex items-center justify-center gap-2 mb-6 bg-black/20 max-w-[240px] mx-auto">
+          <Lock className="w-4 h-4 text-white" />
+          <span className="font-pixel text-xs tracking-wider">ACCESS CONTROL</span>
+        </div>
+        <p className="text-[10px] text-center font-mono text-gray-300 tracking-widest uppercase -mt-4 mb-6">
+          AUTHORIZATION REQUIRED
         </p>
 
         {errorMsg && (
@@ -114,12 +117,12 @@ export const Gate: React.FC<GateProps> = ({ onUnlock, isDarkMode }) => {
         )}
 
         {gateStatus === 'SCANNING' || gateStatus === 'SUCCESS' ? (
-          <div className="space-y-3 py-12 text-center">
-            <div className="w-12 h-12 border-4 border-snes-green border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="font-pixel text-snes-green text-xl tracking-widest animate-pulse">
+          <div className="space-y-3 py-8 text-center">
+            <div className="w-10 h-10 border-4 border-green-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="font-pixel text-green-400 text-lg tracking-widest animate-pulse">
               {gateStatus === 'SUCCESS' ? 'ACCESS GRANTED' : 'ESTABLISHING UPLINK...'}
             </p>
-            <div className="bg-black/50 border border-snes-green/30 p-3 text-left font-mono text-xs text-snes-green space-y-1 max-w-sm mx-auto">
+            <div className="bg-black/60 border border-green-500/30 p-3 text-left font-mono text-xs text-green-400 space-y-1">
               {logs.map((log, i) => (
                 <div key={i}>{`> ${log}`}</div>
               ))}
@@ -133,41 +136,41 @@ export const Gate: React.FC<GateProps> = ({ onUnlock, isDarkMode }) => {
 
             {/* Agent Name */}
             <div className="space-y-1">
-              <label className="text-xs uppercase tracking-wider text-cyan-400 flex items-center gap-1">
-                <User className="w-3 h-3" /> Agent Name:
+              <label className="text-[10px] uppercase tracking-widest text-gray-300 flex items-center gap-1 font-mono">
+                <User className="w-3 h-3" /> AGENT_NAME
               </label>
               <input 
                 type="text" 
                 required
                 value={firstName} 
                 onChange={(e) => setFirstName(e.target.value)}
-                className="w-full bg-black/50 border border-cyan-500/30 p-2 text-cyan-200 text-sm outline-none focus:border-cyan-400"
-                placeholder="Enter agent name..."
+                className="w-full bg-[#001f5c] border border-white/30 p-2.5 text-white text-sm outline-none focus:border-white font-mono placeholder:text-gray-500"
+                placeholder="IDENTIFIER"
               />
             </div>
 
             {/* Agent Email */}
             <div className="space-y-1">
-              <label className="text-xs uppercase tracking-wider text-cyan-400 flex items-center gap-1">
-                <Terminal className="w-3 h-3" /> Agent Email:
+              <label className="text-[10px] uppercase tracking-widest text-gray-300 flex items-center gap-1 font-mono">
+                <Terminal className="w-3 h-3" /> AGENT_EMAIL
               </label>
               <input 
                 type="email" 
                 required
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-black/50 border border-cyan-500/30 p-2 text-cyan-200 text-sm outline-none focus:border-cyan-400"
-                placeholder="Enter secure email..."
+                className="w-full bg-[#001f5c] border border-white/30 p-2.5 text-white text-sm outline-none focus:border-white font-mono placeholder:text-gray-500"
+                placeholder="SECURE COMMS"
               />
             </div>
 
             {/* Sector Spec */}
             <div className="space-y-1">
-              <label className="text-xs uppercase tracking-wider text-cyan-400">Sector Spec:</label>
+              <label className="text-[10px] uppercase tracking-widest text-gray-300 font-mono">SECTOR_SPEC</label>
               <select 
-                value={sector} 
-                onChange={(e) => setSector(e.target.value)}
-                className="w-full bg-black/50 border border-cyan-500/30 p-2 text-cyan-200 text-sm outline-none focus:border-cyan-400"
+                value={sectorSpec} 
+                onChange={(e) => setSectorSpec(e.target.value)}
+                className="w-full bg-[#001f5c] border border-white/30 p-2.5 text-white text-sm outline-none focus:border-white font-mono cursor-pointer"
               >
                 <option value="SECTOR_01 // GARMENT DROPS">SECTOR_01 // GARMENT DROPS</option>
                 <option value="SECTOR_02 // VISUAL AURA">SECTOR_02 // VISUAL AURA</option>
@@ -177,71 +180,51 @@ export const Gate: React.FC<GateProps> = ({ onUnlock, isDarkMode }) => {
 
             {/* Region / Country */}
             <div className="space-y-1">
-              <label className="text-xs uppercase tracking-wider text-cyan-400 flex items-center gap-1">
-                <Globe className="w-3 h-3" /> Region / Country:
+              <label className="text-[10px] uppercase tracking-widest text-gray-300 flex items-center gap-1 font-mono">
+                <Globe className="w-3 h-3" /> REGION / COUNTRY
               </label>
-              <input 
-                type="text" 
+              <select 
                 value={country} 
                 onChange={(e) => setCountry(e.target.value)}
-                className="w-full bg-black/50 border border-cyan-500/30 p-2 text-cyan-200 text-sm outline-none focus:border-cyan-400"
-              />
-            </div>
-
-            {/* Q1: Hardware Weight */}
-            <div className="space-y-1">
-              <label className="text-xs uppercase tracking-wider text-snes-yellow">Select your Hardware Weight for Field Operations:</label>
-              <select 
-                value={hardwareWeight} 
-                onChange={(e) => setHardwareWeight(e.target.value)}
-                className="w-full bg-black/50 border border-snes-yellow/30 p-2 text-snes-yellow text-sm outline-none focus:border-snes-yellow"
+                className="w-full bg-[#001f5c] border border-white/30 p-2.5 text-white text-sm outline-none focus:border-white font-mono cursor-pointer"
               >
-                <option value="450 GSM Heavyweight (Restricted)">450 GSM Heavyweight (Restricted)</option>
-                <option value="280 GSM Standard (Archive)">280 GSM Standard (Archive)</option>
-              </select>
-            </div>
-
-            {/* Q2: Retrieval Environment */}
-            <div className="space-y-1">
-              <label className="text-xs uppercase tracking-wider text-snes-yellow">Identify your preferred Retrieval Environment:</label>
-              <select 
-                value={retrievalEnv} 
-                onChange={(e) => setRetrievalEnv(e.target.value)}
-                className="w-full bg-black/50 border border-snes-yellow/30 p-2 text-snes-yellow text-sm outline-none focus:border-snes-yellow"
-              >
-                <option value="Dystopian London (Film)">Dystopian London (Film)</option>
-                <option value="Neo-Glitch (AMV)">Neo-Glitch (AMV)</option>
-                <option value="Archive 1994 (Retro)">Archive 1994 (Retro)</option>
-              </select>
-            </div>
-
-            {/* Q3: Uplink Frequency */}
-            <div className="space-y-1">
-              <label className="text-xs uppercase tracking-wider text-snes-yellow">Authorize your Uplink Frequency (Sound Spec):</label>
-              <select 
-                value={uplinkFreq} 
-                onChange={(e) => setUplinkFreq(e.target.value)}
-                className="w-full bg-black/50 border border-snes-yellow/30 p-2 text-snes-yellow text-sm outline-none focus:border-snes-yellow"
-              >
-                <option value="Bass-Heavy / Drill">Bass-Heavy / Drill</option>
-                <option value="ASMR / Mechanical">ASMR / Mechanical</option>
-                <option value="Lo-Fi / Static Hum">Lo-Fi / Static Hum</option>
+                <option value="United States">United States</option>
+                <option value="United Kingdom">United Kingdom</option>
+                <option value="Canada">Canada</option>
+                <option value="Australia">Australia</option>
+                <option value="Japan">Japan</option>
+                <option value="Germany">Germany</option>
+                <option value="France">France</option>
+                <option value="Italy">Italy</option>
+                <option value="Spain">Spain</option>
+                <option value="South Korea">South Korea</option>
+                <option value="Rest of World / Other">Rest of World / Other</option>
               </select>
             </div>
 
             {/* Submit Button */}
             <button 
               type="submit" 
-              className="w-full bg-snes-purple hover:bg-snes-purple-light text-white font-pixel text-xl tracking-widest p-3 mt-6 border-2 border-white transition-all shadow-[4px_4px_0_#000] active:translate-y-1"
+              className="w-full bg-white hover:bg-gray-100 text-[#002b80] font-pixel text-xl tracking-widest p-3 mt-6 transition-all shadow-lg active:translate-y-0.5 flex items-center justify-center gap-2"
             >
-              INITIALIZE SYSTEM
+              <span>INITIALIZE SYSTEM</span>
+              <div className="w-2 h-2 bg-[#002b80]"></div>
             </button>
           </form>
         )}
 
-        <div className="mt-6 pt-4 border-t border-gray-800 text-center text-[10px] text-gray-500 font-mono">
-          SECURE PROTOCOL ACTIVE // ENCRYPTED DATA PIPELINE
+        {/* Footer Logs Status */}
+        <div className="mt-8 flex justify-between items-center text-[10px] font-mono text-gray-300 border-t border-white/20 pt-3">
+          <div className="flex items-center gap-1.5">
+            <Globe className="w-3 h-3 text-cyan-400" />
+            <span>CLIENT_IP: 219.76.7.121</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span>LOGGING_ACTIVE</span>
+          </div>
         </div>
+
       </div>
     </div>
   );
