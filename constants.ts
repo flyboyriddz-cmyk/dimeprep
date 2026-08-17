@@ -323,4 +323,4 @@ export const PRODUCTS: Product[] = [
     isArchived: true
   }
 ];
-
+export const SYSTEM_PROMPT = "";                                  
