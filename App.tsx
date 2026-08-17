@@ -8,10 +8,15 @@ import { Assistant } from './components/Assistant';
 import { Gate } from './components/Gate';
 import { Transition } from './components/Transition';
 import { Privacy } from './components/Privacy';
+import { OrderTracker } from './components/OrderTracker';
 import { PRODUCTS } from './constants';
 import { Product, CartItem, ViewState, ProductVariant } from './types';
 import { ShieldAlert, Zap, Globe, Package, Filter, Instagram, Twitter, Mail } from 'lucide-react';
-import { supabase } from './services/supabaseClient';
+import { vibrate, HAPTICS } from './utils/haptics';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder');
 
 const App = () => {
   const [isLocked, setIsLocked] = useState(true);
@@ -35,22 +40,6 @@ const App = () => {
   // Category State for Home Filter
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
 
-  const handleUnlock = () => {
-    setShowGlitch(true);
-    setTimeout(() => {
-      setIsLocked(false);
-      setShowGlitch(false);
-      setIsSecureMode(false); // Ensure secure mode is off after unlock
-    }, 400); // Optimized for seamless entry (reduced from 1000)
-  };
-
-  const handleLock = async () => {
-    await supabase.auth.signOut();
-    setIsLocked(true);
-    setView(ViewState.HOME);
-    setShowGlitch(false);
-  };
-
   // Content Protection & Init
   useEffect(() => {
     // 1. Console Warning for "Hackers"
@@ -58,32 +47,13 @@ const App = () => {
     console.log("%cUNAUTHORIZED ACCESS TO D.P GEMS SOURCE CODE IS A VIOLATION OF INTERNATIONAL CYBER LAW.", "color: white; background: red; font-size: 16px; padding: 10px; font-family: monospace;");
     console.log("%cIf you are seeing this, your IP address has been logged for security analysis.", "font-size: 14px; color: #aaa;");
 
-    // Auth Check
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
+    try {
+      // Persistence Check: Auto-unlock if user has previously entered
+      const hasAccess = localStorage.getItem('dp_gems_access');
+      if (hasAccess === 'true') {
         setIsLocked(false);
       }
-    };
-    checkSession();
-
-    // Auth Listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        // If we are currently locked, play the unlock animation
-        setIsLocked(prev => {
-          if (prev) {
-            handleUnlock();
-            return prev; // handleUnlock will set it to false after delay
-          }
-          return false;
-        });
-      } else {
-        setIsLocked(true);
-      }
-    });
-
-    try {
+      
       // Theme Init
       const savedTheme = localStorage.getItem('dp_gems_theme');
       if (savedTheme === 'dark') {
@@ -151,7 +121,6 @@ const App = () => {
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      subscription.unsubscribe();
       document.removeEventListener('contextmenu', handleContextMenu);
       document.removeEventListener('dragstart', handleDragStart);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
@@ -163,7 +132,7 @@ const App = () => {
 
   // Handle Scroll Reset on View Change
   useEffect(() => {
-    if (view === ViewState.PRODUCT_DETAIL || view === ViewState.CHECKOUT || view === ViewState.PRIVACY) {
+    if (view === ViewState.PRODUCT_DETAIL || view === ViewState.CHECKOUT || view === ViewState.PRIVACY || view === ViewState.ORDER_TRACKER) {
       // Force scroll to top immediately
       window.scrollTo(0, 0);
       // Fallback for browsers with paint lag
@@ -185,6 +154,23 @@ const App = () => {
     });
   };
 
+  const handleUnlock = () => {
+    vibrate(HAPTICS.gateUnlock);
+    setShowGlitch(true);
+    setTimeout(() => {
+      setIsLocked(false);
+      setShowGlitch(false);
+      setIsSecureMode(false); // Ensure secure mode is off after unlock
+    }, 400); // Optimized for seamless entry (reduced from 1000)
+  };
+
+  const handleLock = () => {
+    localStorage.removeItem('dp_gems_access');
+    setIsLocked(true);
+    setView(ViewState.HOME);
+    setShowGlitch(false);
+  };
+
   const showToast = (msg: string) => {
     const id = Date.now();
     setToast({ msg, id });
@@ -196,6 +182,7 @@ const App = () => {
   // Cart Logic
   // Updated to handle Sizes as part of unique identity
   const handleAddToCart = (product: Product, variant?: ProductVariant, size?: string, openCart: boolean = true) => {
+    vibrate(HAPTICS.light);
     setCart(prev => {
       const existing = prev.find(p => {
         const variantMatch = variant ? p.selectedVariant?.id === variant.id : p.id === product.id && !p.selectedVariant;
@@ -265,6 +252,7 @@ const App = () => {
   };
 
   const handleCheckoutStart = () => {
+    vibrate(HAPTICS.medium);
     setIsCartOpen(false);
     setView(ViewState.CHECKOUT);
   };
@@ -308,9 +296,12 @@ const App = () => {
     }, 0);
   };
 
+  // FRONTEND SANITIZATION: Filter out archived/vaulted items so they don't show on the main grid
+  const visibleProducts = PRODUCTS.filter(p => !p.isArchived);
+
   const filteredProducts = selectedCategory === 'ALL' 
-    ? PRODUCTS 
-    : PRODUCTS.filter(p => p.category === selectedCategory);
+    ? visibleProducts 
+    : visibleProducts.filter(p => p.category === selectedCategory);
 
   if (isLocked) {
     return (
@@ -345,12 +336,31 @@ const App = () => {
 
       <Navbar 
         cartCount={cartCount} 
-        onOpenCart={() => setIsCartOpen(true)}
-        onHome={goHome}
-        onAssistantToggle={() => setIsAssistantOpen(!isAssistantOpen)}
+        onOpenCart={() => {
+            vibrate(HAPTICS.light);
+            setIsCartOpen(true);
+        }}
+        onHome={() => {
+            vibrate(HAPTICS.light);
+            goHome();
+        }}
+        onAssistantToggle={() => {
+            vibrate(HAPTICS.light);
+            setIsAssistantOpen(!isAssistantOpen);
+        }}
         isDarkMode={isDarkMode}
-        toggleTheme={toggleTheme}
-        onLock={handleLock}
+        toggleTheme={() => {
+            vibrate(HAPTICS.light);
+            toggleTheme();
+        }}
+        onLock={() => {
+            vibrate(HAPTICS.medium);
+            handleLock();
+        }}
+        onOrderTracker={() => {
+            vibrate(HAPTICS.light);
+            setView(ViewState.ORDER_TRACKER);
+        }}
       />
 
       <main className="pt-16 md:pt-24 min-h-screen pb-0 flex flex-col">
@@ -374,11 +384,21 @@ const App = () => {
                             <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-pixel mb-4 leading-[0.85] text-white drop-shadow-[4px_4px_0_#5c4fb3] mix-blend-screen">
                                 D.P GEMS<br/><span className="text-snes-purple-light">ARCHIVE</span>
                             </h1>
-                            <p className="font-retro text-lg md:text-2xl text-gray-400 max-w-lg leading-tight mx-auto md:mx-0">
+                            <p className="font-retro text-lg md:text-2xl text-gray-400 max-w-lg leading-tight mx-auto md:mx-0 mb-6">
                                 HIGH-FIDELITY TECHNICAL GARMENTS FOR THE DIGITAL AGE.
                             </p>
                             
-                            <div className="mt-6 flex flex-wrap gap-4 justify-center md:justify-start">
+                            {/* NEW BANNER IMAGE */}
+                            <div className="mb-8 relative group inline-block hover:scale-[1.01] transition-transform duration-300">
+                                <div className="absolute inset-0 bg-snes-purple translate-x-2 translate-y-2 group-hover:translate-x-3 group-hover:translate-y-3 transition-transform"></div>
+                                <img 
+                                    src="/assets/product-hero.jpg" 
+                                    alt="GSM DROPS - Visual Aura" 
+                                    className="relative z-10 w-full max-w-[600px] h-auto border-4 border-white"
+                                />
+                            </div>
+                            
+                            <div className="mt-2 flex flex-wrap gap-4 justify-center md:justify-start">
                                 <button onClick={() => {
                                    const el = document.getElementById('shop-grid');
                                    el?.scrollIntoView({ behavior: 'smooth' });
@@ -395,7 +415,7 @@ const App = () => {
                         
                         {/* Hero Graphic / Hologram */}
                         <div className="w-64 h-64 md:w-80 md:h-80 border-4 border-white rotate-3 shadow-[12px_12px_0_#5c4fb3] bg-snes-blue overflow-hidden relative group shrink-0 hidden sm:block hover:rotate-0 transition-transform duration-500">
-                             <img src="https://lh3.googleusercontent.com/d/1AvEBxFjiDeHeafONBMZy9l3q-gky_f_r" className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700" alt="Hero Asset" />
+                             <img src="/assets/hero-banner.jpg" className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700" alt="Hero Asset" />
                              <div className="absolute inset-0 bg-gradient-to-t from-snes-purple/80 to-transparent mix-blend-overlay"></div>
                              
                              {/* Floating badge */}
@@ -424,7 +444,7 @@ const App = () => {
                   </div>
                   
                   <div className="flex flex-wrap gap-2 md:gap-4 justify-center">
-                      {['ALL', 'OUTERWEAR', 'TOPS'].map(cat => (
+                      {['ALL', 'OUTERWEAR', 'HOODIES', 'SWEATS', 'TOPS', 'HATS'].map(cat => (
                           <button 
                              key={cat}
                              onClick={() => setSelectedCategory(cat)}
@@ -493,7 +513,10 @@ const App = () => {
                             <li><button onClick={() => setSelectedCategory('ALL')} className="hover:text-snes-purple-light transition-colors hover:translate-x-1 inline-block">/// ALL SYSTEMS</button></li>
                             <li><button onClick={() => setSelectedCategory('OUTERWEAR')} className="hover:text-snes-purple-light transition-colors hover:translate-x-1 inline-block">/// OUTERWEAR</button></li>
                             <li><button onClick={() => setSelectedCategory('TOPS')} className="hover:text-snes-purple-light transition-colors hover:translate-x-1 inline-block">/// TOPS</button></li>
+                            <li><button onClick={() => setSelectedCategory('SWEATS')} className="hover:text-snes-purple-light transition-colors hover:translate-x-1 inline-block">/// SWEATS</button></li>
+                            <li><button onClick={() => setSelectedCategory('HATS')} className="hover:text-snes-purple-light transition-colors hover:translate-x-1 inline-block">/// HATS</button></li>
                             <li><button onClick={() => setView(ViewState.PRIVACY)} className="hover:text-snes-purple-light transition-colors hover:translate-x-1 inline-block">/// PRIVACY PROTOCOL</button></li>
+                            <li><button onClick={() => setView(ViewState.ORDER_TRACKER)} className="hover:text-snes-purple-light transition-colors hover:translate-x-1 inline-block">/// ORDER TRACKER</button></li>
                         </ul>
                     </div>
 
@@ -528,16 +551,37 @@ const App = () => {
         )}
 
         {view === ViewState.CHECKOUT && (
-          <Checkout 
-            cart={cart}
-            total={cart.reduce((acc, item) => acc + (item.price * item.quantity), 0)}
-            onBack={() => setView(ViewState.HOME)}
-            onComplete={handleOrderComplete}
-          />
+          <Elements 
+            stripe={stripePromise} 
+            options={{ 
+              mode: 'payment', 
+              amount: Math.max(100, Math.round(cart.reduce((acc, item) => acc + (item.price * item.quantity), 0) * 100)), 
+              currency: 'gbp',
+              appearance: { theme: 'night' } 
+            }}
+          >
+            <Checkout 
+              cart={cart}
+              total={cart.reduce((acc, item) => acc + (item.price * item.quantity), 0)}
+              onBack={() => setView(ViewState.HOME)}
+              onComplete={handleOrderComplete}
+            />
+          </Elements>
         )}
         
         {view === ViewState.PRIVACY && (
            <Privacy onBack={goHome} />
+        )}
+
+        {view === ViewState.ORDER_TRACKER && (
+           <div className="py-12">
+             <OrderTracker />
+             <div className="text-center mt-8">
+               <button onClick={goHome} className="font-pixel text-snes-blue hover:text-snes-purple hover:underline">
+                 RETURN TO HOME
+               </button>
+             </div>
+           </div>
         )}
       </main>
 
