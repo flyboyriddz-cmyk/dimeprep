@@ -388,13 +388,20 @@ const App = () => {
                                 HIGH-FIDELITY TECHNICAL GARMENTS FOR THE DIGITAL AGE.
                             </p>
                             
-                            {/* NEW BANNER IMAGE */}
-                            <div className="mb-8 relative group inline-block hover:scale-[1.01] transition-transform duration-300">
+                            {/* GSM DROPS - Visual Aura 16:9 Video Banner */}
+                            <div className="mb-8 relative group inline-block hover:scale-[1.01] transition-transform duration-300 w-full max-w-[600px]">
+                                {/* Retro Offset Border Shadow */}
                                 <div className="absolute inset-0 bg-snes-purple translate-x-2 translate-y-2 group-hover:translate-x-3 group-hover:translate-y-3 transition-transform"></div>
-                                <img 
-                                    src="/assets/product-hero.jpg" 
-                                    alt="GSM DROPS - Visual Aura" 
-                                    className="relative z-10 w-full max-w-[600px] h-auto border-4 border-white"
+                                
+                                <video
+                                    src="/assets/hero-loop.mp4"
+                                    autoPlay
+                                    loop
+                                    muted
+                                    defaultMuted
+                                    playsInline
+                                    preload="auto"
+                                    className="relative z-10 w-full aspect-video object-cover border-4 border-white shadow-retro pointer-events-none"
                                 />
                             </div>
                             
