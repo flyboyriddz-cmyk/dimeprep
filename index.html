@@ -2,19 +2,33 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- SILENT FAILURE MITIGATION: Load Sentry early to catch bundle load errors -->
+    <script
+      src="https://browser.sentry-cdn.com/7.100.0/bundle.min.js"
+      integrity="sha384-NnO9XN0K6c/t09oV/B+sO+Nf9q4f4cZ5n0o+H1C5t4Z5m4D+Y/R5qX0h9tZ4P+M"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      if (typeof Sentry !== 'undefined') {
+        Sentry.init({
+          dsn: "%VITE_SENTRY_DSN%", // Would be replaced at build/runtime in production
+          tracesSampleRate: 1.0,
+        });
+      }
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" />
     <meta name="format-detection" content="telephone=no">
     <title>D.P GEMS // SUPER EDITION</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://lh3.googleusercontent.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     
     <!-- Preload Critical Visuals for Seamless Experience -->
-    <link rel="preload" as="image" href="https://lh3.googleusercontent.com/d/1AvEBxFjiDeHeafONBMZy9l3q-gky_f_r">
-    <link rel="preload" as="image" href="https://lh3.googleusercontent.com/d/1sgVfKvpDIqIP4KyEGM5jX_37TNtmHpaQ">
-    <link rel="preload" as="image" href="https://lh3.googleusercontent.com/d/1MferAsUvaCBEgSrHgcOOmE52T0HmtT56" fetchpriority="high">
+    <link rel="preload" as="image" href="/assets/hero-banner.jpg">
+    <link rel="preload" as="image" href="/assets/agent-success.png">
+    <link rel="preload" as="image" href="/assets/product-hero.jpg" fetchpriority="high">
+    <link rel="preload" as="image" href="/assets/background.jpg">
 
     <script>
       tailwind.config = {
@@ -245,7 +259,10 @@
       }
       
       .image-pixelated {
+        image-rendering: -moz-crisp-edges;
+        image-rendering: -webkit-crisp-edges;
         image-rendering: pixelated;
+        image-rendering: crisp-edges;
       }
 
       .animate-blink { animation: blink 1s step-end infinite; }
@@ -284,7 +301,6 @@
 </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="index.tsx"></script>
-  <script type="module" src="/index.tsx"></script>
-</body>
+    <script type="module" src="/index.tsx"></script>
+  </body>
 </html>
