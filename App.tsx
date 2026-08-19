@@ -50,7 +50,8 @@ const App = () => {
     try {
       // Persistence Check: Auto-unlock if user has previously entered
       const hasAccess = localStorage.getItem('dp_gems_access');
-      if (hasAccess === 'true') {
+      const savedEmail = localStorage.getItem('dp_gems_user_email');
+      if (hasAccess === 'true' || savedEmail) {
         setIsLocked(false);
       }
       
@@ -398,7 +399,7 @@ const App = () => {
                                     autoPlay
                                     loop
                                     muted
-                                    defaultMuted
+                                    defaultmuted="true"
                                     playsInline
                                     preload="auto"
                                     className="relative z-10 w-full aspect-video object-cover border-4 border-white shadow-retro pointer-events-none"
@@ -531,7 +532,7 @@ const App = () => {
                          <h3 className="font-pixel text-lg text-white uppercase border-b border-gray-700 pb-2">NEWSLETTER_UPLINK</h3>
                          <p className="font-retro text-gray-400 text-xs">Subscribe for encrypted drop notifications.</p>
                          <div className="flex">
-                             <input type="email" placeholder="ENTER_EMAIL" className="bg-black/30 border border-gray-600 px-3 py-2 text-white font-retro text-sm flex-1 outline-none focus:border-snes-purple" />
+                             <input type="email" defaultValue={localStorage.getItem('dp_gems_user_email') || ''} placeholder="ENTER_EMAIL" className="bg-black/30 border border-gray-600 px-3 py-2 text-white font-retro text-sm flex-1 outline-none focus:border-snes-purple" />
                              <button className="bg-snes-purple text-white px-4 font-pixel text-sm hover:bg-snes-purple-light transition-colors">JOIN</button>
                          </div>
                     </div>
