@@ -2,9 +2,9 @@ import React, { useState, useEffect, useMemo, Component, ReactNode } from 'react
 import { CartItem } from '../types';
 import { CreditCard, ArrowLeft, Lock, CheckCircle, AlertTriangle, Globe, User, RefreshCw, Sparkles, Gem, Terminal, XCircle, WifiOff, ShieldCheck, Bug, Ruler } from 'lucide-react';
 import { COUNTRIES } from '../constants';
-import GooglePayButton from '@google-pay/button-react';
+import { ExpressCheckoutElement, useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { logExtraction } from '../services/geminiService';
-import { supabase } from '../services/supabaseClient';
+import { vibrate, HAPTICS } from '../utils/haptics';
 
 interface CheckoutProps {
   cart: CartItem[];
@@ -102,12 +102,15 @@ class PaymentProviderErrorBoundary extends Component<PaymentProviderErrorBoundar
 }
 
 export const Checkout: React.FC<CheckoutProps> = ({ cart, total, onBack, onComplete }) => {
+  const stripe = useStripe();
+  const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
   const [showAnimeSequence, setShowAnimeSequence] = useState(false);
   const [auraActive, setAuraActive] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isOrderConfirmed, setIsOrderConfirmed] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [secureOrderId, setSecureOrderId] = useState<string | null>(null);
   
   // New state for Google Pay environment check
   // Default to false so we don't render and crash immediately in iframes
@@ -118,7 +121,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ cart, total, onBack, onCompl
   const [attemptHistory, setAttemptHistory] = useState<number[]>([]);
 
   const [formData, setFormData] = useState<FormData>({
-    email: '', phone: '', firstName: '', lastName: '', address: '', city: '',
+    email: localStorage.getItem('dp_gems_user_email') || '', phone: '', firstName: '', lastName: '', address: '', city: '',
     zip: '', country: 'United States', cardNumber: '', expiry: '', cvv: '', _honey: ''
   });
 
@@ -173,13 +176,6 @@ export const Checkout: React.FC<CheckoutProps> = ({ cart, total, onBack, onCompl
     if (!formData.email.includes('@')) newErrors.email = 'INVALID EMAIL PROTOCOL';
     if (!formData.firstName) newErrors.firstName = 'ID REQUIRED';
     if (!formData.address) newErrors.address = 'LOCATION REQUIRED';
-    // Stricter validation for security
-    if (formData.cardNumber.replace(/\s/g, '').length < 12 || !/^\d[\d\s]*$/.test(formData.cardNumber)) {
-        newErrors.cardNumber = 'INVALID CARD SEQUENCE';
-    }
-    if (formData.cvv.length < 3 || !/^\d+$/.test(formData.cvv)) {
-        newErrors.cvv = 'SECURITY CODE INVALID';
-    }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -191,47 +187,54 @@ export const Checkout: React.FC<CheckoutProps> = ({ cart, total, onBack, onCompl
   };
 
   const handleSuccessfulTransaction = async (source: string, id: string) => {
+      vibrate(HAPTICS.success);
       setPaymentError(null);
       setIsProcessing(true);
       
-      // Save Order to Supabase
-      try {
-          const orderData = {
-              customer_email: formData.email,
-              customer_name: `${formData.firstName} ${formData.lastName}`,
-              phone: formData.phone,
-              address: {
-                  street: formData.address,
-                  city: formData.city,
-                  zip: formData.zip,
-                  country: formData.country
-              },
-              items: cart,
-              total_amount: total,
-              payment_method: source,
-              transaction_id: id,
-              created_at: new Date().toISOString()
-          };
-
-          const { error } = await supabase.from('orders').insert([orderData]);
-          
-          if (error) {
-              console.error('Supabase Error:', error);
-          } else {
-              console.log('Order saved to Supabase');
-          }
-      } catch (err) {
-          console.error('Supabase Exception:', err);
-      }
-
       // Log extraction via Gemini Service
       const itemNames = cart.map(c => c.name);
       await logExtraction(id, total, itemNames);
 
+      // TikTok Dual-Track Conversion (Browser + Server-Side)
+      const contents = cart.map(item => ({
+          content_id: item.id,
+          content_name: item.name,
+          quantity: item.quantity,
+          price: item.price
+      }));
+
+      // 1. Browser Pixel with Deduplication (event_id)
+      if (typeof window !== 'undefined' && (window as any).ttq) {
+          (window as any).ttq.track('CompletePayment', {
+              contents: contents,
+              value: total,
+              currency: 'GBP'
+          }, {
+              event_id: id
+          });
+      }
+
+      // 2. Server-Side Supabase Edge Function Uplink
+      try {
+          await fetch('https://npthcsmewqjadezjxxez.supabase.co/functions/v1/send-tiktok-lead', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  event: 'CompletePayment',
+                  event_id: id,
+                  email: formData.email,
+                  value: total,
+                  currency: 'GBP',
+                  contents: contents
+              })
+          });
+      } catch (err) {
+          console.warn('Server-side TikTok uplink failed:', err);
+      }
+
       setIsProcessing(false);
       
       // 1. Start Anime Character Sequence
-
       setShowAnimeSequence(true);
       
       // 2. Activate Aura & Text ("Dopamine Hit")
@@ -258,12 +261,13 @@ export const Checkout: React.FC<CheckoutProps> = ({ cart, total, onBack, onCompl
     setPaymentError("PROTOCOL_ERROR: GOOGLE_PAY_UNREACHABLE");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // HONEYPOT / BOT DETECTION
     if (formData._honey) {
         console.warn("Bot detected via honeypot field.");
+        vibrate(HAPTICS.error);
         setIsProcessing(true);
         // Simulate a long processing time then fail
         setTimeout(() => {
@@ -274,6 +278,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ cart, total, onBack, onCompl
     }
 
     if (!validate()) {
+        vibrate(HAPTICS.error);
         setPaymentError("VALIDATION_ERROR: CHECK FIELDS");
         return;
     }
@@ -282,6 +287,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ cart, total, onBack, onCompl
     const now = Date.now();
     const recentAttempts = attemptHistory.filter(t => now - t < 5000);
     if (recentAttempts.length > 2) {
+       vibrate(HAPTICS.error);
        setPaymentError("TRAFFIC ANOMALY DETECTED. COOL DOWN ACTIVE.");
        return;
     }
@@ -290,10 +296,65 @@ export const Checkout: React.FC<CheckoutProps> = ({ cart, total, onBack, onCompl
 
     setIsProcessing(true);
     
-    // Simulate API processing
-    setTimeout(() => {
-        handleSuccessfulTransaction('CC', `TX-${Date.now()}`);
-    }, 2500);
+    // SECURE ORDER ROUTING: Get PaymentIntent client_secret, submit elements, and confirm payment
+    try {
+        const response = await fetch('/api/create-payment-intent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                amount: Math.round(total * 100) // Convert to pence
+            })
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || 'Secure checkout failed');
+        }
+
+        // Generate local tracking order ID
+        const currentOrderId = `ord_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+        // Submit Elements form (internal state update)
+        const { error: submitError } = await elements!.submit();
+        if (submitError) {
+            throw new Error(submitError.message);
+        }
+
+        // Confirm payment with Stripe
+        const { error } = await stripe!.confirmPayment({
+            elements: elements!,
+            clientSecret: data.clientSecret,
+            confirmParams: {
+                return_url: window.location.href,
+                payment_method_data: {
+                    billing_details: {
+                        name: `${formData.firstName} ${formData.lastName}`,
+                        email: formData.email,
+                        phone: formData.phone,
+                        address: {
+                            line1: formData.address,
+                            city: formData.city,
+                            postal_code: formData.zip,
+                            country: 'US', // We are hardcoding or using formData.country mapped to ISO code
+                        }
+                    }
+                }
+            },
+            redirect: 'if_required'
+        });
+
+        if (error) {
+            throw new Error(error.message);
+        } else {
+            setSecureOrderId(currentOrderId);
+            handleSuccessfulTransaction('STRIPE', currentOrderId);
+        }
+    } catch (err: any) {
+        vibrate(HAPTICS.error);
+        setPaymentError(err.message || 'COMMUNICATION FAILURE');
+        setIsProcessing(false);
+    }
   };
 
   // Find the first item with an NFT or default to a generic "Gem" concept
@@ -325,7 +386,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ cart, total, onBack, onCompl
                      {/* Character Image - Slides/Fades in */}
                      <div className={`relative z-10 transition-all duration-500 ease-out transform ${auraActive ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-20 opacity-0 scale-90'}`}>
                          <img 
-                            src="https://lh3.googleusercontent.com/d/1sgVfKvpDIqIP4KyEGM5jX_37TNtmHpaQ" 
+                            src="/assets/agent-success.png" 
                             alt="Payment Success Agent" 
                             className="w-auto h-[55vh] md:h-[70vh] object-contain drop-shadow-[0_0_25px_rgba(255,255,255,0.4)]"
                             style={{ 
@@ -394,24 +455,19 @@ export const Checkout: React.FC<CheckoutProps> = ({ cart, total, onBack, onCompl
                 </div>
 
                 {/* Holographic NFT Card Container */}
-                <div className="relative w-64 md:w-80 aspect-[2/3] group perspective-1000">
+                <div className="relative w-64 sm:w-72 md:w-80 max-w-[85vw] aspect-[2/3] group perspective-1000 my-4">
                     <div className="relative w-full h-full transform transition-transform duration-500 hover:rotate-y-12 hover:rotate-x-12 preserve-3d animate-float">
                         
                         {/* The Card Image - Gold Border */}
-                        <div className="absolute inset-0 border-4 border-yellow-500/50 rounded-xl overflow-hidden bg-black shadow-[0_0_50px_rgba(234,179,8,0.3)]">
-                            {/* 8-Bit Scaling Effect Wrapper - Forces massive pixelation */}
-                            <div className="w-full h-full relative overflow-hidden">
-                                <div className="w-[25%] h-[25%] scale-[400%] origin-top-left">
-                                    <img 
-                                        src={nftImageSrc} 
-                                        alt="Digital Asset" 
-                                        className="w-full h-full object-cover image-pixelated contrast-125 saturate-150"
-                                    />
-                                </div>
-                            </div>
+                        <div className="absolute inset-0 border-4 border-yellow-500/60 rounded-xl overflow-hidden bg-black shadow-[0_0_50px_rgba(234,179,8,0.35)] flex items-center justify-center p-2">
+                            <img 
+                                src={nftImageSrc} 
+                                alt="Digital Asset" 
+                                className="w-full h-full object-contain image-pixelated contrast-125 saturate-125 drop-shadow-[0_0_15px_rgba(250,204,21,0.3)]"
+                            />
 
                             {/* Holo Gradient Overlay - Adjusted for Gold/Cyan */}
-                            <div className="absolute inset-0 bg-gradient-to-tr from-yellow-500/10 via-cyan-400/10 to-transparent opacity-50 mix-blend-overlay animate-holo"></div>
+                            <div className="absolute inset-0 bg-gradient-to-tr from-yellow-500/10 via-cyan-400/10 to-transparent opacity-50 mix-blend-overlay animate-holo pointer-events-none"></div>
                             {/* Scanline/Grid Overlay for extra retro feel */}
                             <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%] opacity-40 pointer-events-none"></div>
                         </div>
@@ -429,7 +485,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ cart, total, onBack, onCompl
                                      <Lock className="w-3 h-3" />
                                  </div>
                                  <div className="text-cyan-200 text-xs font-mono break-all opacity-90 tracking-wider">
-                                     0x{Date.now().toString(16).toUpperCase()}{Math.random().toString(16).substr(2, 6).toUpperCase()}
+                                     {secureOrderId || `0x${Date.now().toString(16).toUpperCase()}${Math.random().toString(16).substr(2, 6).toUpperCase()}`}
                                  </div>
                              </div>
                         </div>
@@ -477,6 +533,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ cart, total, onBack, onCompl
                     <div className="space-y-6 text-lg">
                         <p className="leading-relaxed">
                             YOUR ACQUISITION IS SECURE.<br/>
+                            TRANSACTION ID: <span className="font-mono text-xs break-all bg-gray-100 px-1 rounded">{secureOrderId}</span><br/><br/>
                             A CONFIRMATION LINK HAS BEEN DISPATCHED TO:<br/>
                             <span className="font-bold text-snes-purple bg-snes-purple/10 px-2 py-1 rounded mt-1 inline-block">
                                 {formData.email || 'OPERATIVE@UNKNOWN.NET'}
@@ -538,88 +595,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ cart, total, onBack, onCompl
             {/* Form Section */}
             <div className="md:col-span-7 space-y-8">
                 
-                {/* Payment Protocol Box */}
-                <div className="relative border-4 border-snes-dark bg-snes-light p-6 pt-8 shadow-retro">
-                    <div className="absolute -top-3 left-4 bg-snes-dark text-snes-yellow px-2 font-pixel text-sm uppercase tracking-wider border border-snes-yellow">
-                        [SELECT_PAYMENT_PROTOCOL]
-                    </div>
-                    
-                    <div className="space-y-6">
-                        {/* Google Pay - Wrapped in Error Boundary */}
-                        <div className="w-full relative">
-                            <p className="font-pixel text-xs mb-2 text-snes-gray-dark">[INITIATE_GOOGLE_PAY_PROTOCOL]</p>
-                            <div className="w-full overflow-hidden rounded shadow-sm hover:shadow-md transition-shadow">
-                                {isEnvCheckComplete && isGooglePaySupported ? (
-                                    <PaymentProviderErrorBoundary 
-                                        label="GPAY" 
-                                        onSimulate={() => handleSuccessfulTransaction('GPAY', 'GP-SIM-' + Date.now())}
-                                    >
-                                        <GooglePayButton
-                                            environment="TEST"
-                                            paymentRequest={{
-                                                apiVersion: 2,
-                                                apiVersionMinor: 0,
-                                                allowedPaymentMethods: [{
-                                                    type: 'CARD',
-                                                    parameters: {
-                                                        allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
-                                                        allowedCardNetworks: ['MASTERCARD', 'VISA'],
-                                                    },
-                                                    tokenizationSpecification: {
-                                                        type: 'PAYMENT_GATEWAY',
-                                                        parameters: {
-                                                            gateway: 'example',
-                                                            gatewayMerchantId: 'BCR2DN5T7252Z3BN',
-                                                        },
-                                                    },
-                                                }],
-                                                merchantInfo: {
-                                                    merchantId: 'BCR2DN5T7252Z3BN',
-                                                    merchantName: 'D.P GEMS ARCHIVE',
-                                                },
-                                                transactionInfo: {
-                                                    totalPriceStatus: 'FINAL',
-                                                    totalPriceLabel: 'Total',
-                                                    totalPrice: total.toFixed(2),
-                                                    currencyCode: 'USD',
-                                                    countryCode: 'US',
-                                                },
-                                            }}
-                                            onLoadPaymentData={paymentRequest => {
-                                                console.log('Extraction_Authorized', paymentRequest);
-                                                handleSuccessfulTransaction('GPAY', 'GP-' + Date.now());
-                                            }}
-                                            onError={handleGooglePayError}
-                                            onCancel={() => {
-                                                console.log('Google Pay Cancelled');
-                                                setPaymentError(null);
-                                            }}
-                                            buttonColor="black"
-                                            buttonType="buy"
-                                            style={{ width: '100%', height: '48px' }}
-                                            className="w-full"
-                                        />
-                                    </PaymentProviderErrorBoundary>
-                                ) : (
-                                    <button 
-                                        type="button"
-                                        onClick={(e) => { e.preventDefault(); handleSuccessfulTransaction('GPAY', 'GP-SIM-' + Date.now()); }}
-                                        className="w-full h-12 bg-snes-light border-2 border-dashed border-gray-400 rounded flex items-center justify-center gap-2 text-gray-500 font-pixel text-xs hover:bg-white hover:text-snes-purple hover:border-snes-purple transition-all cursor-pointer group"
-                                    >
-                                        <WifiOff className="w-4 h-4 group-hover:animate-pulse" />
-                                        <span>{!isEnvCheckComplete ? 'CHECKING ENV...' : 'GPAY RESTRICTED // CLICK_TO_SIMULATE'}</span>
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div className="mt-8 flex items-center justify-between gap-4">
-                        <div className="h-px bg-snes-dark/20 flex-1"></div>
-                        <span className="font-pixel text-snes-gray-dark text-xs">OR DECRYPT MANUAL ENTRY</span>
-                        <div className="h-px bg-snes-dark/20 flex-1"></div>
-                    </div>
-                </div>
+
 
                 {/* Standard CC Form */}
                 <div className="bg-snes-white border-4 border-snes-dark shadow-retro p-6 relative overflow-hidden">
@@ -757,43 +733,20 @@ export const Checkout: React.FC<CheckoutProps> = ({ cart, total, onBack, onCompl
                         {/* Payment */}
                         <div className="space-y-4">
                             <h3 className="font-retro text-lg text-snes-gray-dark uppercase border-b border-gray-200">Transaction Keys</h3>
-                            <div className="space-y-1">
-                                <label className="font-retro text-snes-dark uppercase text-sm flex items-center gap-2">
-                                    <CreditCard className="w-4 h-4" /> Card Sequence
-                                </label>
-                                <input 
-                                    type="text" 
-                                    className={`w-full p-3 bg-snes-light border-2 ${errors.cardNumber && touched.cardNumber ? 'border-snes-red' : 'border-gray-300'} focus:border-snes-purple outline-none font-retro text-lg transition-colors tracking-widest`}
-                                    placeholder="0000 0000 0000 0000"
-                                    value={formData.cardNumber}
-                                    onChange={e => setFormData({...formData, cardNumber: e.target.value})}
-                                    onBlur={() => handleBlur('cardNumber')}
-                                />
-                                {errors.cardNumber && touched.cardNumber && <span className="text-snes-red text-xs font-pixel">{errors.cardNumber}</span>}
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <label className="font-retro text-snes-dark uppercase text-sm">Expiry</label>
-                                    <input 
-                                        type="text" 
-                                        className="w-full p-3 bg-snes-light border-2 border-gray-300 focus:border-snes-purple outline-none font-retro text-lg transition-colors text-center"
-                                        placeholder="MM/YY"
-                                        value={formData.expiry}
-                                        onChange={e => setFormData({...formData, expiry: e.target.value})}
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="font-retro text-snes-dark uppercase text-sm">CVV / CVC</label>
-                                    <input 
-                                        type="text" 
-                                        className={`w-full p-3 bg-snes-light border-2 ${errors.cvv && touched.cvv ? 'border-snes-red' : 'border-gray-300'} focus:border-snes-purple outline-none font-retro text-lg transition-colors text-center`}
-                                        placeholder="123"
-                                        maxLength={4}
-                                        value={formData.cvv}
-                                        onChange={e => setFormData({...formData, cvv: e.target.value})}
-                                        onBlur={() => handleBlur('cvv')}
-                                    />
-                                </div>
+                            <div className="bg-snes-light border-2 border-gray-300 p-4 font-retro transition-colors rounded">
+                                <PaymentElement options={{ 
+                                    layout: 'tabs',
+                                    style: {
+                                        base: {
+                                            fontFamily: 'monospace',
+                                            fontSize: '16px',
+                                            color: '#2d3748',
+                                            '::placeholder': {
+                                                color: '#a0aec0',
+                                            },
+                                        },
+                                    }
+                                }} />
                             </div>
                         </div>
 
@@ -852,6 +805,61 @@ export const Checkout: React.FC<CheckoutProps> = ({ cart, total, onBack, onCompl
                             <span>TOTAL</span>
                             <span>${total}</span>
                         </div>
+                    </div>
+                    
+                    <div className="mb-4">
+                        <ExpressCheckoutElement 
+                            onConfirm={async (event) => {
+                                setIsProcessing(true);
+                                setPaymentError(null);
+                                
+                                try {
+                                    // 1. Get PaymentIntent client_secret
+                                    const response = await fetch('/api/create-payment-intent', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                            amount: Math.round(total * 100)
+                                        })
+                                    });
+
+                                    const data = await response.json();
+                                    
+                                    if (!response.ok) {
+                                        throw new Error(data.error || 'Secure checkout failed');
+                                    }
+
+                                    const currentOrderId = `ord_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+                                    // 2. Submit Elements form (internal state update)
+                                    const { error: submitError } = await elements!.submit();
+                                    if (submitError) {
+                                        throw new Error(submitError.message);
+                                    }
+
+                                    // 3. Confirm payment with Stripe
+                                    const { error } = await stripe!.confirmPayment({
+                                        elements: elements!,
+                                        clientSecret: data.clientSecret,
+                                        confirmParams: {
+                                            return_url: window.location.href,
+                                        },
+                                        redirect: 'if_required' // We will handle it locally
+                                    });
+
+                                    if (error) {
+                                        throw new Error(error.message);
+                                    } else {
+                                        setSecureOrderId(currentOrderId);
+                                        handleSuccessfulTransaction('STRIPE_EXPRESS', currentOrderId);
+                                    }
+                                } catch (err: any) {
+                                    vibrate(HAPTICS.error);
+                                    setPaymentError(err.message || 'COMMUNICATION FAILURE');
+                                    setIsProcessing(false);
+                                }
+                            }}
+                        />
                     </div>
                 </div>
 
