@@ -48,11 +48,22 @@ const App = () => {
     console.log("%cIf you are seeing this, your IP address has been logged for security analysis.", "font-size: 14px; color: #aaa;");
 
     try {
-      // Persistence Check: Auto-unlock if user has previously entered
+      // Persistence & URL Auth Check
+      const urlParams = new URLSearchParams(window.location.search);
+      const isTikTokUplink = urlParams.get('auth') === 'uplink';
+      
       const hasAccess = localStorage.getItem('dp_gems_access');
       const savedEmail = localStorage.getItem('dp_gems_user_email');
-      if (hasAccess === 'true' || savedEmail) {
+      
+      // If they have the URL token, OR have been here before, unlock the gate
+      if (isTikTokUplink || hasAccess === 'true' || savedEmail) {
         setIsLocked(false);
+        localStorage.setItem('dp_gems_access', 'true');
+        
+        // Clean the URL so the token disappears from the address bar (stealth mode)
+        if (isTikTokUplink) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
       }
       
       // Theme Init
