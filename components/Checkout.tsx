@@ -216,7 +216,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ cart, total, onBack, onCompl
 
       // 2. Server-Side Supabase Edge Function Uplink
       try {
-          await fetch('https://npthcsmewqjadezjxxez.supabase.co/functions/v1/send-tiktok-lead', {
+          await fetch('https://npthcsrmewqjadezjxez.supabase.co/functions/v1/send-tiktok-lead', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -298,7 +298,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ cart, total, onBack, onCompl
     
     // SECURE ORDER ROUTING: Get PaymentIntent client_secret, submit elements, and confirm payment
     try {
-        const response = await fetch('/api/create-payment-intent', {
+        const response = await fetch('https://npthcsrmewqjadezjxez.supabase.co/functions/v1/create-payment-intent', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -628,6 +628,61 @@ export const Checkout: React.FC<CheckoutProps> = ({ cart, total, onBack, onCompl
                             />
                         </div>
 
+                        <div className="mb-8">
+                            <ExpressCheckoutElement 
+                                onConfirm={async (event) => {
+                                    setIsProcessing(true);
+                                    setPaymentError(null);
+                                    
+                                    try {
+                                        // 1. Get PaymentIntent client_secret
+                                        const response = await fetch('https://npthcsrmewqjadezjxez.supabase.co/functions/v1/create-payment-intent', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({
+                                                amount: Math.round(total * 100)
+                                            })
+                                        });
+
+                                        const data = await response.json();
+                                        
+                                        if (!response.ok) {
+                                            throw new Error(data.error || 'Secure checkout failed');
+                                        }
+
+                                        const currentOrderId = `ord_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+                                        // 2. Submit Elements form (internal state update)
+                                        const { error: submitError } = await elements!.submit();
+                                        if (submitError) {
+                                            throw new Error(submitError.message);
+                                        }
+
+                                        // 3. Confirm payment with Stripe
+                                        const { error } = await stripe!.confirmPayment({
+                                            elements: elements!,
+                                            clientSecret: data.clientSecret,
+                                            confirmParams: {
+                                                return_url: window.location.href,
+                                            },
+                                            redirect: 'if_required' // We will handle it locally
+                                        });
+
+                                        if (error) {
+                                            throw new Error(error.message);
+                                        } else {
+                                            setSecureOrderId(currentOrderId);
+                                            handleSuccessfulTransaction('STRIPE_EXPRESS', currentOrderId);
+                                        }
+                                    } catch (err: any) {
+                                        vibrate(HAPTICS.error);
+                                        setPaymentError(err.message || 'COMMUNICATION FAILURE');
+                                        setIsProcessing(false);
+                                    }
+                                }}
+                            />
+                        </div>
+
                         {/* Contact */}
                         <div className="space-y-4">
                             <h3 className="font-retro text-lg text-snes-gray-dark uppercase border-b border-gray-200">Contact Protocol</h3>
@@ -805,61 +860,6 @@ export const Checkout: React.FC<CheckoutProps> = ({ cart, total, onBack, onCompl
                             <span>TOTAL</span>
                             <span>${total}</span>
                         </div>
-                    </div>
-                    
-                    <div className="mb-4">
-                        <ExpressCheckoutElement 
-                            onConfirm={async (event) => {
-                                setIsProcessing(true);
-                                setPaymentError(null);
-                                
-                                try {
-                                    // 1. Get PaymentIntent client_secret
-                                    const response = await fetch('/api/create-payment-intent', {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({
-                                            amount: Math.round(total * 100)
-                                        })
-                                    });
-
-                                    const data = await response.json();
-                                    
-                                    if (!response.ok) {
-                                        throw new Error(data.error || 'Secure checkout failed');
-                                    }
-
-                                    const currentOrderId = `ord_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-
-                                    // 2. Submit Elements form (internal state update)
-                                    const { error: submitError } = await elements!.submit();
-                                    if (submitError) {
-                                        throw new Error(submitError.message);
-                                    }
-
-                                    // 3. Confirm payment with Stripe
-                                    const { error } = await stripe!.confirmPayment({
-                                        elements: elements!,
-                                        clientSecret: data.clientSecret,
-                                        confirmParams: {
-                                            return_url: window.location.href,
-                                        },
-                                        redirect: 'if_required' // We will handle it locally
-                                    });
-
-                                    if (error) {
-                                        throw new Error(error.message);
-                                    } else {
-                                        setSecureOrderId(currentOrderId);
-                                        handleSuccessfulTransaction('STRIPE_EXPRESS', currentOrderId);
-                                    }
-                                } catch (err: any) {
-                                    vibrate(HAPTICS.error);
-                                    setPaymentError(err.message || 'COMMUNICATION FAILURE');
-                                    setIsProcessing(false);
-                                }
-                            }}
-                        />
                     </div>
                 </div>
 
